@@ -1,0 +1,161 @@
+﻿@page
+@model MovieTicketBooking.Pages.SeatsModel
+@{
+}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+
+    .screen {
+        margin: 20px auto;
+        padding: 10px;
+        background-color: #ccc;
+        border-radius: 5px;
+        width: 60%;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .seating-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px auto;
+    }
+
+    .seat-row {
+        display: flex;
+        justify-content: center;
+        margin: 5px 0;
+    }
+
+    .seat {
+        width: 30px;
+        height: 30px;
+        margin: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        background-color: #28a745; /* Available */
+        color: white;
+    }
+
+        .seat.reserved {
+            background-color: #dc3545; /* Reserved */
+            cursor: not-allowed;
+        }
+
+        .seat.selected {
+            background-color: #ffc107; /* Selected */
+            color: white;
+        }
+
+    .legend {
+        margin-top: 20px;
+        text-align: left; /* Aligns text inside legend */
+        width: 100%;
+    }
+
+    .confirm-button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        .confirm-button:hover {
+            background-color: #0056b3;
+        }
+</style>
+
+<body>
+    <section class="breadcrumb-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb-area-content">
+                        <h1>Order Seats</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="seat-selection" style="padding-bottom:50px">
+        <div class="container">
+            <h2 style="margin-top:20px">Select Your Seat</h2>
+            <div class="screen">Screen</div>
+            <form method="post" id="seatSelectionForm">
+                <div class="seating-grid">
+                    @foreach (var row in Model.Seats.Keys)
+                    {
+                        <div class="seat-row">
+                            @foreach (var seat in Model.Seats[row])
+                            {
+                                <div class="seat @(seat.IsFree ? "available" : "reserved")"
+                                     data-seat="@seat.SeatId">
+                                    @seat.Name
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <div class="legend">
+                        <span class="seat" style="background-color: #28a745;">Available</span>
+                        <span class="seat reserved" style="background-color: #dc3545; color: white;">Reserved</span>
+                        <span class="seat selected" style="background-color: #ffc107; color: white;">Selected</span>
+                    </div>
+
+                    <button style="margin-top:-80px" id="confirmButton" class="confirm-button">Confirm Selection</button>
+                </div>
+                <input type="hidden" name="selectedSeats" id="selectedSeats" />
+                <input type="hidden" name="showtimeId" id="showtimeId" value="@Model.ShowtimeId"/>
+            </form>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectedSeats = [];
+
+            const seats = document.querySelectorAll('.seat.available');
+            seats.forEach(seat => {
+                seat.addEventListener('click', function () {
+                    const seatNumber = this.getAttribute('data-seat');
+
+                    // Toggle selection
+                    if (selectedSeats.includes(seatNumber)) {
+                        selectedSeats.splice(selectedSeats.indexOf(seatNumber), 1); // Deselect
+                        this.classList.remove('selected');
+                    } else {
+                        selectedSeats.push(seatNumber); // Select
+                        this.classList.add('selected');
+                    }
+                    // Update the hidden input with selected seats
+                    document.getElementById('selectedSeats').value = selectedSeats.join(',');
+                        });
+            });
+                });
+
+        const successMessage = "@ViewData["SuccessMessage"]";
+
+        // If there's a message, show a popup
+        if (successMessage) {
+            alert(successMessage);  // Simple alert
+        }
+
+        const messageBooking = "@ViewData["MessageBooking"]";
+
+        // If there's a message, show a popup
+        if (messageBooking) {
+            alert(messageBooking);  // Simple alert
+        }
+    </script>
+</body>

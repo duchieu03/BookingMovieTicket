@@ -1,0 +1,282 @@
+﻿@page
+@model MovieTicketBooking.Pages.Admin.ManageAccountModel
+@using Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+    List<User> listUsers = ViewData["users"] as List<User>;
+    ViewData["Title"] = "Admin Manage Account";
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - MovieTicketBooking</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/cssAdmin/main.css">
+    <link rel="stylesheet" href="~/cssAdmin/page/employee.css">
+    <style>
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+            .pagination .page-item {
+                display: inline-block;
+                margin: 0 5px;
+            }
+
+                .pagination .page-item .page-link {
+                    color: #007bff;
+                    border: 1px solid #dee2e6;
+                    border-radius: 5px;
+                    padding: 8px 12px;
+                    text-decoration: none;
+                    transition: background-color 0.3s, color 0.3s;
+                }
+
+                .pagination .page-item.active .page-link {
+                    background-color: #007bff;
+                    color: #fff;
+                    border-color: #007bff;
+                }
+
+                .pagination .page-item .page-link:hover {
+                    background-color: #0056b3;
+                    color: #fff;
+                    border-color: #0056b3;
+                }
+
+                .pagination .page-item.disabled .page-link {
+                    color: #6c757d;
+                    pointer-events: none;
+                    background-color: #f8f9fa;
+                    border-color: #dee2e6;
+                }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header__left">
+            <a class="navbar-brand" asp-area="" asp-page="/Index">MovieTicketBooking</a>
+        </div>
+        @if (HttpContext.Session.GetString("user") != null)
+        {
+            <div style="display: flex; margin-left: auto; align-items: center">
+                <a class="navbar-brand" asp-page="/Auth/Login" asp-page-handler="Logout">Logout</a>
+            </div>
+        }
+    </div>
+    <div class="main">
+        <!-- Nabvar -->
+        <div class="navbarc">
+            <div class="menu-item" data-href="./Dashboard">
+                <div class="menu-icon m-icon m-icon-baocao"></div>
+                <div class="menu-text">Dashboard</div>
+            </div>
+            <div class="menu-item" data-href="./ManageAccount">
+                <div class="menu-icon m-icon m-icon-trangchu"></div>
+                <div class="menu-text"><a>Manage account</a></div>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="m-page-header">
+                <div class="m-page-header__title">Manage Account</div>
+            </div>
+
+            <div class="m-page-table">
+                <div class="m-page-grid">
+                    <div id="table-wrapper">
+                        <div id="table-scroll">
+                            <table class="m-table">
+                                <thead>
+                                    <tr>
+                                        <th>UserId</th>
+                                        <th>Email</th>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Dob</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var u in listUsers)
+                                    {
+                                        <tr>
+                                            <td>@u.UserId</td>
+                                            <td>@u.Email</td>
+                                            <td>@u.Name</td>
+                                            <td>@u.Phone</td>
+                                            <td>@String.Format("{0:dd/MM/yyyy}", u.Dob)</td>
+                                            @if (u.Role == 1)
+                                            {
+                                                <td>User</td>
+                                            }
+                                            else if (u.Role == 2)
+                                            {
+                                                <td>Staff</td>
+                                            }
+                                            else if (u.Role == 3)
+                                            {
+                                                <td>Admin</td>
+                                            }
+
+                                            @if (u.Status == 1)
+                                            {
+                                                <td style="color: green">Active</td>
+                                            }
+                                            else if (u.Status == 0)
+                                            {
+                                                <td style="color: red">Disabled</td>
+                                            }
+                                            <td><button class="m-btn edit-btn" onclick="editUser('@u.UserId', '@u.Email', '@u.Name', '@u.Phone', '@u.Dob?.ToString("yyyy-MM-dd")', '@u.Role', '@u.Status')">Edit</button></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <div class="pagination">
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination justify-content-center">
+                                        @if (Model.CurrentPage > 1)
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="/Admin/ManageAccount?page=@(Model.CurrentPage - 1)">Previous</a>
+                                            </li>
+                                        }
+                                        @for (int i = 1; i <= Model.TotalPages; i++)
+                                        {
+                                            <li class="page-item @(Model.CurrentPage == i ? "active" : "")" aria-current="page">
+                                                <a class="page-link" href="/Admin/ManageAccount?page=@i">@i</a>
+                                            </li>
+                                        }
+                                        @if (Model.CurrentPage < Model.TotalPages)
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="/Admin/ManageAccount?page=@(Model.CurrentPage + 1)">Next</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pagination -->
+                <div class="m-paging">
+                    <div class="m-paging__left">Tổng: @listUsers.Count</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup form -->
+    <div id="dlgDetail" mdialog class="m-form" style="display: none;">
+        <div class="m-form__container">
+            <div class="m-form__header">
+                <div class="header-content">Edit user</div>
+                <div class="header-close">
+                    <a href="javascript:void(0);" onclick="closeForm()" style="color: red;font-weight: bold">X</a>
+                </div>
+            </div>
+            <div class="m-form__body">
+                <form id="editForm" method="post" asp-page-handler="EditAccount">
+                    <div class="m-form__row">
+                        <div class="form__row-grid" style="grid-template-columns: calc(15% - 4px) calc(85% - 4px);">
+                            <div class="input-component">
+                                <label class="m-form__label">User Id</label>
+                                <input type="text" class="m-form__input" id="UserId" name="UserId" readonly>
+                            </div>
+                            <div class="input-component">
+                                <label class="m-form__label">Name</label>
+                                <input type="text" class="m-form__input" id="Name" name="Name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m-form__row">
+                        <div class="input-component">
+                            <label class="m-form__label">Date of birth</label>
+                            <input type="date" class="m-form__input--date" id="Dob" name="Dob">
+                        </div>
+                    </div>
+                    <div class="m-form__row">
+                        <div class="input-component">
+                            <label class="m-form__label">Phone</label>
+                            <input type="text" class="m-form__input" id="Phone" name="Phone">
+                        </div>
+                    </div>
+                    <div class="m-form__row">
+                        <div class="input-component">
+                            <label title="Email" class="m-form__label">Email</label>
+                            <input type="email" id="Email" class="m-form__input" name="Email" required>
+                        </div>
+                    </div>
+                    <div class="m-form__row">
+                        <div class="form__row-grid">
+                            <div class="input-component">
+                                <label class="m-form__label">Role</label>
+                                <select class="m-form__input" id="Role" name="Role" class="form-control">
+                                    <option value="1">User</option>
+                                    <option value="2">Staff</option>
+                                    <option value="3">Admin</option>
+                                </select>
+                            </div>
+                            <div class="input-component">
+                                <label class="m-form__label">Status</label>
+                                <select class="m-form__input" id="Status" name="Status" class="form-control">
+                                    <option value="1">Active</option>
+                                    <option value="0">Disabled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m-form__footer">
+                        <button type="submit" class="m-btn edit-btn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/jsAdmin/jquery-3.7.1.min.js"></script>
+    <script src="../jsAdmin/employee.js"></script>
+    <script>
+        const message = "@ViewData["message"]";
+
+        // If there's a message, show a popup
+        if (message) {
+            alert(message);  // Simple alert
+        }
+
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                window.location.href = item.getAttribute('data-href');
+            });
+        });
+
+        function editUser(userId, email, mame, phone, dob, role, status) {
+            document.getElementById("dlgDetail").style.display = "block";
+            document.getElementById("UserId").value = userId;
+            document.getElementById("Name").value = mame;
+            document.getElementById("Dob").value = dob;
+            document.getElementById("Phone").value = phone;
+            document.getElementById("Email").value = email;
+            document.getElementById("Role").value = role;
+            document.getElementById("Status").value = status;
+        }
+
+        function closeForm() {
+            $('#dlgDetail').hide();
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,134 @@
+﻿@page
+@model MovieTicketBooking.Pages.Auth.LoginModel
+@using MovieTicketBooking.Models
+@{
+    Layout = null;
+    ViewData["Title"] = "Login";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - MovieTicketBooking</title>
+    <link rel="stylesheet" href="~/cssAuth/main.css">
+    <link rel="icon" type="image/png" href="~/assets/img/favcion.png" />
+</head>
+
+<body>
+    <section class="user">
+        <div class="user_options-container">
+            <div class="user_options-text">
+                <div class="user_options-unregistered">
+                    <h2 class="user_unregistered-title">Don't have an account?</h2>
+                    <button class="user_unregistered-signup" id="signup-button">Sign up</button>
+                </div>
+
+                <div class="user_options-registered">
+                    <h2 class="user_registered-title">Have an account?</h2>
+                    <button class="user_registered-login" id="login-button">Login</button>
+                </div>
+            </div>
+
+            <div class="user_options-forms" id="user_options-forms">
+                <div class="user_forms-login">
+                    <h2 class="forms_title"><strong>Login</strong></h2>
+                    <form asp-page-handler="Login" method="post" class="forms_form">
+                        <fieldset class="forms_fieldset">
+                            <div class="forms_field">
+                                <input asp-for="user.Email" name="email" type="email" placeholder="Email" class="forms_field-input" required autofocus />
+                            </div>
+                            <div class="forms_field">
+                                <input asp-for="user.Password" name="password" type="password" placeholder="Password" class="forms_field-input" required/>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Message))
+                            {
+                                <p style="color: red; margin:0">
+                                    @Model.Message
+                                </p>
+                            }
+                        </fieldset>
+                        <div>
+                            <a href="#" id="forgot-password-link">Forgot password?</a>
+                        </div>
+                        <div class="forms_buttons">
+                            <input type="submit" value="Log In" class="forms_buttons-action">
+                        </div>
+                    </form>
+                    <form asp-page-handler="ForgotPassword" method="post" id="forgot-password-form" class="forms_form">
+                        <input asp-for="user.Email" name="email" type="hidden" />
+                    </form>
+                </div>
+                <div class="user_forms-signup" style="top: 20px;">
+                    <h2 class="forms_title" style="margin-bottom: 20px"><strong>Sign Up</strong></h2>
+                    <form asp-page-handler="Register" method="post" class="forms_form">
+                        <fieldset class="forms_fieldset">
+                            <div class="forms_field">
+                                <input asp-for="user.Email" name="user.Email" type="email" placeholder="Email" class="forms_field-input" required />
+                            </div>
+                            <div class="forms_field">
+                                <input asp-for="user.Password" name="user.Password" type="password" placeholder="Password" class="forms_field-input" required />
+                            </div>
+                            <div class="forms_field">
+                                <input asp-for="ConfirmPassword" name="ConfirmPassword" type="password" placeholder="Confirm Password" class="forms_field-input" required />
+                            </div>
+                            <div class="forms_field">
+                                <input asp-for="user.Name" name="user.Name" type="text" placeholder="Name" class="forms_field-input" required />
+                            </div>
+                            <div class="forms_field">
+                                <input asp-for="user.Dob" name="user.Dob" type="date" class="forms_field-input" required />
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Message))
+                            {
+                                <p style="color: red; margin:0">
+                                    @Model.Message
+                                </p>
+                            }
+                        </fieldset>
+                        <div class="forms_buttons">
+                            <input type="submit" value="Sign up" class="forms_buttons-action">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+        const showRegisterForm = @Model.ShowRegisterForm.ToString().ToLower();
+        
+        if (showRegisterForm) {
+            userForms.classList.remove('bounceRight');
+            userForms.classList.add('bounceLeft');
+            document.getElementById('user_options-forms').style.minHeight = "520px";
+        }
+    });
+
+        const signupButton = document.getElementById('signup-button'),
+            loginButton = document.getElementById('login-button'),
+            forgotPasswordLink = document.getElementById('forgot-password-link'),
+            userForms = document.getElementById('user_options-forms');
+
+        signupButton.addEventListener('click', () => {
+            userForms.classList.remove('bounceRight');
+            userForms.classList.add('bounceLeft');
+            document.getElementById('user_options-forms').style.minHeight = "520px";
+        }, false);
+
+        loginButton.addEventListener('click', () => {
+            userForms.classList.remove('bounceLeft');
+            userForms.classList.add('bounceRight');
+            document.getElementById('user_options-forms').style.minHeight = "420px";
+        }, false);
+
+        forgotPasswordLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            document.querySelector('#forgot-password-form input[name="email"]').value = document.querySelector('input[name="email"]').value;
+            document.getElementById('forgot-password-form').submit();
+        }, false);
+    </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+﻿@page
+@model MovieTicketBooking.Pages.Movies.DetailModel
+@{
+    ViewData["Title"] = Model.Movie.Title;
+}
+
+<!-- breadcrumb area start -->
+<section class="breadcrumb-area">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb-area-content">
+                    <h1>@Model.Movie.Title</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!-- breadcrumb area end -->
+<!-- transformers area start -->
+<section class="transformers-area">
+    <div class="container">
+        <div class="transformers-box">
+            <div class="row flexbox-center">
+                <div class="col-lg-5 text-lg-left text-center">
+                    <div class="transformers-content">
+                        <img src="~/assets/img/movies/@Model.Movie.ImgUrl" alt="about" />
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="transformers-content">
+                        <h2>@Model.Movie.Title</h2>
+                        <p>@string.Join(" | ", Model.Movie.Genres.Select(g => g.Name))</p>
+                        <ul>
+                            <li>
+                                <div class="transformers-left">
+                                    Movie:
+                                </div>
+                                <div class="transformers-right">
+                                    @Model.Movie.Title
+                                </div>
+                            </li>
+                            <li>
+                                <div class="transformers-left">
+                                    Director:
+                                </div>
+                                <div class="transformers-right">
+                                    @Model.Movie.Director
+                                </div>
+                            </li>
+                            <li>
+                                <div class="transformers-left">
+                                    Actors:
+                                </div>
+                                <div class="transformers-right">
+                                    @string.Join(", ", Model.Movie.Actors.Select(a => a.Name))
+                                </div>
+                            </li>
+                            <li>
+                                <div class="transformers-left">
+                                    Time:
+                                </div>
+                                <div class="transformers-right">
+                                    @($"{Model.Movie.Duration / 60}h{Model.Movie.Duration % 60}m")
+                                </div>
+                            </li>
+                            <li>
+                                <div class="transformers-left">
+                                    Release:
+                                </div>
+                                <div class="transformers-right">
+                                    @Model.Movie.ReleaseDate?.ToString("dd-MM-yyyy")
+                                </div>
+                            </li>
+                            <li>
+                                <div class="transformers-left">
+                                    Language:
+                                </div>
+                                <div class="transformers-right">
+                                    @Model.Movie.Language
+                                </div>
+                            </li>
+                            <li>
+                                <div class="transformers-left">
+                                    Slots:
+                                </div>
+                                <div class="transformers-right">
+                                    @foreach (var showtime in Model.Movie.Showtimes)
+                                    {
+                                        @showtime.StartTime?.ToString("HH:mm")
+                                        <br />
+                                    }
+                                </div>
+                            </li>
+                            <li>
+                                <a asp-page="/Showtimes" asp-route-movieId="@Model.Movie.MovieId"
+                                    class="theme-btn"><i class="icofont icofont-ticket"></i> BUY TICKET</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!-- transformers area end -->
+<!-- details area start -->
+<section class="details-area">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="details-content">
+                    <div class="details-overview">
+                        <h2>Overview</h2>
+                        <p>@Model.Movie.Description</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!-- details area end -->

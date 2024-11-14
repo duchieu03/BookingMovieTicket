@@ -1,0 +1,121 @@
+﻿@page
+@using MovieTicketBooking.Common
+@model MovieTicketBooking.Pages.Movies.IndexModel
+@{
+    ViewData["Title"] = "Movies";
+}
+<style>
+    .pagination {
+        margin-top: 20px;
+        text-align: center; 
+    }
+
+        .pagination .page-item {
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+            .pagination .page-item .page-link {
+                color: #007bff;
+                border: 1px solid #dee2e6;
+                border-radius: 5px;
+                padding: 8px 12px;
+                text-decoration: none;
+                transition: background-color 0.3s, color 0.3s;
+            }
+
+            .pagination .page-item.active .page-link {
+                background-color: #007bff;
+                color: #fff;
+                border-color: #007bff;
+            }
+
+            .pagination .page-item .page-link:hover {
+                background-color: #0056b3;
+                color: #fff;
+                border-color: #0056b3;
+            }
+
+            .pagination .page-item.disabled .page-link {
+                color: #6c757d;
+                pointer-events: none;
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+            }
+
+</style>
+<!-- breadcrumb area start -->
+<section class="breadcrumb-area">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb-area-content">
+                    <h1>Movies</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!-- breadcrumb area end -->
+<!-- portfolio section start -->
+<section class="portfolio-area pt-60 mb-3">
+    <div class="container">
+        <div class="row flexbox-center">
+            <div class="col-lg-6 text-center text-lg-left">
+                <div class="section-title">
+                    <h1><i class="icofont icofont-movie"></i> Movie</h1>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center text-lg-right">
+                <div class="portfolio-menu">
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row portfolio-item">
+            @foreach (var movie in Model.Movies)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="single-portfolio">
+                        <div class="single-portfolio-img">
+                            <a asp-page="/Movies/Detail" asp-route-movieId="@movie.MovieId"><img src="~/assets/img/movies/@movie.ImgUrl" alt="portfolio" /></a>
+                        </div>
+                        <div class="portfolio-content">
+                            <a asp-page="/Movies/Detail" asp-route-movieId="@movie.MovieId"><h2>@movie.Title</h2></a>
+                            <div class="review">
+                                <h5>@(movie.Status == (int)MovieStatus.ComingSoon ? "Coming Soon" : $"{movie.Duration / 60}h{movie.Duration % 60}m")</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="pagination">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    @if (Model.CurrentPage > 1)
+
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Movies?page=@(Model.CurrentPage - 1)">Previous</a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+
+                    {
+                        <li class="page-item @(Model.CurrentPage == i ? "active" : "")" aria-current="page">
+                            <a class="page-link" href="/Movies?page=@i">@i</a>
+                        </li>
+                    }
+                    @if (Model.CurrentPage < Model.TotalPages)
+
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Movies?page=@(Model.CurrentPage + 1)">Next</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    </div>
+</section><!-- portfolio section end -->
+

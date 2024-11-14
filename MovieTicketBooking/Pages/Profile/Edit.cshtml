@@ -1,0 +1,143 @@
+﻿@page
+@model MovieTicketBooking.Pages.Profile.EditModel
+@using Newtonsoft.Json
+@using MovieTicketBooking.Models
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var userName = "Guest";
+    var userJson = HttpContextAccessor.HttpContext?.Session.GetString("user");
+    User? user = null;
+    User u = ViewData["user"] as User;
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        user = JsonConvert.DeserializeObject<User>(userJson);
+        userName = user?.Name ?? "Guest";
+    }
+    var successMessage = ViewData["SuccessMessage"] as string;
+}
+
+
+    <section class="hero-area" style="padding: 200px 0 100px 0">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xl-9 col-lg-9 col-md-12 col-sm-12 col-12">
+                    <div class="card h-100" style="background-color: black">
+                        <div class="card-body">
+                            <form method="post" id="editProfileForm" asp-page-handler="EditProfile">
+                                <input type="text" class="m-form__input" asp-for="User.UserId" value="@user.UserId" hidden>
+                                <div class="row">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <h6 class="mb-2 text-primary">Personal Details</h6>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <label>Name</label>
+                                            <input type="text" class="form-control" asp-for="User.Name" value="@u.Name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <input type="email" class="form-control" asp-for="User.Email" value="@u.Email" required readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <label>Phone</label>
+                                            <input type="number" class="form-control" asp-for="User.Phone" value="@u.Phone" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <label>Date of birth</label>
+                                            <input type="date" class="form-control" asp-for="User.Dob" value="@u.Dob?.ToString("yyyy-MM-dd")" required/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row gutters">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div class="text-right">
+                                            <button type="submit" class="btn btn-primary" style="background-color: #eb315a; border:none; color: white">Update</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <button id="changePasswordBtn" class="btn btn-primary" style="background-color: #eb315a; border: none">Change password</button>
+
+                            <form method="post" asp-page-handler="ChangePassword" id="changePasswordForm" style="display: none;">
+                                <input type="text" class="m-form__input" asp-for="User.UserId" value="@user.UserId" hidden>
+                                <div class="row">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <h6 class="mb-2 text-primary">Change password</h6>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <label>Current password</label>
+                                            <input type="password" class="form-control" asp-for="CurrentPassword" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>New password</label>
+                                            <input type="password" class="form-control" asp-for="NewPassword" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Re-enter new password</label>
+                                            <input type="password" class="form-control" asp-for="ConfirmPassword" required />
+                                        </div>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.Message))
+                                {
+                                    <p style="color: red; margin:0">
+                                        @Model.Message
+                                    </p>
+                                }
+                                <div class="row gutters">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div class="text-right">
+                                            <button type="submit" class="btn btn-primary" style="background-color: #eb315a; border:none; color: white">Change</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <button id="updateProfileBtn" class="btn btn-primary" style="background-color: #eb315a; border: none; display: none">Update profile</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<script src="~/js/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js"></script>
+<script src="~/js/owl.carousel.min.js"></script>
+<script src="~/js/jquery.magnific-popup.min.js"></script>
+<script src="~/js/jquery.slicknav.min.js"></script>
+<script src="~/js/isotope.pkgd.min.js"></script>
+<script src="~/js/main.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#changePasswordBtn").click(function() {
+                $("#editProfileForm").hide();
+                $("#changePasswordForm").show();
+                $("#updateProfileBtn").show();
+                $(this).hide();
+                
+            });
+
+            $("#updateProfileBtn").click(function() {
+                $("#editProfileForm").show();
+                $("#changePasswordForm").hide();
+                $("#changePasswordBtn").show();
+                $(this).hide();
+            });
+
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <text>
+                    alert('@successMessage');
+            </text>
+        }
+        });
+    </script>

@@ -1,0 +1,342 @@
+﻿@page
+@model MovieTicketBooking.Pages.Admin.DashboardModel
+@using Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - MovieTicketBooking</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/cssAdmin/main.css">
+    <link rel="stylesheet" href="~/cssAdmin/page/employee.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header__left">
+            <a class="navbar-brand" asp-area="" asp-page="/Index">MovieTicketBooking</a>
+        </div>
+        @if (HttpContext.Session.GetString("user") != null)
+        {
+            <div style="display: flex; margin-left: auto; align-items: center">
+                <a class="navbar-brand" asp-page="/Auth/Login" asp-page-handler="Logout">Logout</a>
+            </div>
+        }
+
+    </div>
+    <div class="main">
+        <!-- Nabvar -->
+        <div class="navbarc">
+            <div class="menu-item" data-href="./Dashboard">
+                <div class="menu-icon m-icon m-icon-baocao"></div>
+                <div class="menu-text">Dashboard</div>
+            </div>
+            <div class="menu-item" data-href="./ManageAccount">
+                <div class="menu-icon m-icon m-icon-trangchu"></div>
+                <div class="menu-text"><a>Manage account</a></div>
+            </div>
+        </div>
+        <div class="page-content" style="height: fit-content">
+            <div class="m-page-header">
+                <div class="m-page-header__title">Dashboard</div>
+            </div>
+
+            <div class="container mt-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary mb-3">
+                            <div class="card-body d-flex p-2">
+                                <div class="me-3">
+                                    <i class="fa fa-film fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title">Number Of Movies</h5>
+                                    <p class="card-text h5">@Model.NumberOfMovies</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success mb-3">
+                            <div class="card-body d-flex p-2">
+                                <div class="me-3">
+                                    <i class="fa fa-users fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title">Number Of Users</h5>
+                                    <p class="card-text h5">@Model.NumberOfUsers</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @* <div class="col-md-3">
+                        <div class="card text-white bg-info mb-3">
+                            <div class="card-body d-flex p-2">
+                                <div class="me-3">
+                                    <i class="fa fas fa-dollar-sign fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title">7-Day Revenue</h5>
+                                    <p class="card-text h5">@ViewData["TotalRevenueLast7Days"]</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div> *@
+                </div>
+                <br />
+                <br />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div>
+                            <h4 style="text-align: center">Number Of Movie Uploaded Recently</h4>
+                        </div>
+                        <div>
+                            <canvas id="movieLineChart"></canvas>
+                        </div>
+                        
+                    </div>
+                    <div class="col-md-6">
+                        <div>
+                            <h4 style="text-align: center">Top Ticket Sellers</h4>
+                        </div>
+                        <div>
+                            <canvas id="top4movieBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <br/>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div>
+                            <h4 style="text-align: center">Revenue for the Most Recent 5 Months</h4>
+                        </div>
+                        <div>
+                            <canvas id="revenue5monthlinechart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div>
+                            <h4 style="text-align: center">Top Users by Number of Bookings</h4>
+                        </div>
+                        <div>
+                            <canvas id="top3user"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div>
+                            <h4 style="text-align: center">Movie By Genre</h4>
+                        </div>
+                        <div>
+                            <canvas id="moviePieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/jsAdmin/jquery-3.7.1.min.js"></script>
+    <script src="../jsAdmin/employee.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                window.location.href = item.getAttribute('data-href');
+            });
+        });
+
+        //biểu đồ đường số lượng phim phát hành
+        const movieLineChart = document.getElementById('movieLineChart');
+        new Chart(movieLineChart, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(ViewData["MovieMonths"])],
+                datasets: [{
+                    label: 'Number Of Movies',
+                    data: [@Html.Raw(ViewData["MovieCountsPerMonth"])],
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        //biểu đồ cột top 4 phim
+        const top4movieBarChart = document.getElementById('top4movieBarChart');
+        new Chart(top4movieBarChart, {
+            type: 'bar',
+            data: {
+                labels: [@Html.Raw(ViewData["Top3MoviesLabels"])],
+                datasets: [{
+                    label: 'Number Of Ticket Sold',
+                    data: [@Html.Raw(ViewData["Top3MoviesCounts"])],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(201, 203, 207, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgb(75, 192, 192)',
+                        'rgb(54, 162, 235)',
+                        'rgb(153, 102, 255)',
+                        'rgb(201, 203, 207)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
+        //biểu đồ tròn cột số lượng phim theo thể loại
+        const moviePieChart = document.getElementById('moviePieChart');
+        new Chart(moviePieChart, {
+            type: 'pie',
+            data: {
+                labels: [@Html.Raw(ViewData["GenresLabels"])],
+                datasets: [{
+                    label: 'Number Of Movies',
+                    data: [@Html.Raw(ViewData["GenresCounts"])],
+                    backgroundColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(75, 192, 192)',
+                        'rgb(255, 205, 86)',
+                        'rgb(201, 203, 207)',
+                        'rgb(54, 162, 235)',
+                        'rgb(153, 102, 255)',
+                        'rgb(255, 159, 64)',
+                        'rgb(255, 99, 71)'
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+            },
+        });
+
+        //biểu đồ đường doanh thu 5 tháng gần đây
+        const revenue5monthlinechart = document.getElementById('revenue5monthlinechart');
+        new Chart(revenue5monthlinechart, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(ViewData["RevenueMonths"])],
+                datasets: [{
+                    label: 'Revenue in $',
+                    data: [@Html.Raw(ViewData["RevenuePerMonth"])],
+                    fill: false,
+                    borderColor: 'rgb(255, 159, 64)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        //biểu đồ cột top 3 user
+        const top3user = document.getElementById('top3user');
+        new Chart(top3user, {
+            type: 'bar',
+            data: {
+                labels: [@Html.Raw(ViewData["TopUsersLabels"])],
+                datasets: [{
+                    label: 'Number Of Ticket Bought',
+                    data: [@Html.Raw(ViewData["TopUsersCounts"])],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(255, 159, 64, 0.2)',
+                        'rgba(255, 205, 86, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(255, 159, 64)',
+                        'rgb(255, 205, 86)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+
+    </script>
+    <script type="text/javascript" src="~/lib/microsoft-signalr/signalr.js"></script>
+    <script type="text/javascript" src="~/js//site.js"></script>
+</body>
+
+</html>
+
+
+

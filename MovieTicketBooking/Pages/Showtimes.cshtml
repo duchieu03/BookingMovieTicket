@@ -1,0 +1,86 @@
+﻿@page
+@model MovieTicketBooking.Pages.ShowtimesModel
+@{
+}
+
+<style>
+    .showtime-day {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #e0e0e0;
+        border-radius: 5px;
+    }
+
+        .showtime-day h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+    .showtime-slot {
+        margin-bottom: 8px;
+        padding: 8px;
+        background-color: #ffffff;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .book-now-btn {
+        margin-left: 10px;
+        padding: 5px 10px;
+        background-color: #2a2d35;
+        color: #c4c7cc;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+
+        .book-now-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .sold-out{
+            color:red;
+        }
+        </style>
+<section class="breadcrumb-area">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb-area-content">
+                    <h1>Showtimes</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="showtimes-section">
+    <div class="container">
+        <h2 style="margin-top:20px">Showtimes for <span id="film-title">@Model.Title</span></h2>
+        <div class="showtimes" style="margin-top:20px">
+            <!-- Repeat this block for each date -->
+            @foreach (var date in Model.Showtimes.Keys)
+            {
+                <h4>Date: <span class="showtime-date">@date</span></h4>
+                <div class="showtime-slots" style="margin-top:10px">
+                    @foreach (var showtime in Model.Showtimes[date])
+                    {
+                        <div class="showtime-slot">
+                            <span class="showtime-time">@showtime.SlotTime</span> |
+                            <span class="showtime-screen">@showtime.Room</span>
+                            <span class="showtime-price">@showtime.Price per ticket</span>
+                            @if(!showtime.isFull) {
+                                <a asp-page="/Seats" asp-route-showtimeId="@showtime.ShowtimeId" class="book-now-btn">Book Now</a>
+                            } else
+                            {
+                                <span class="sold-out" id="sold-out">SOLD OUT</span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            <!-- End date block -->
+        </div>
+    </div>
+</section>

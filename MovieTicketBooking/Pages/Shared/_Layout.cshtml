@@ -1,0 +1,225 @@
+﻿@using Newtonsoft.Json
+@using MovieTicketBooking.Models
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    var userName = "Guest";
+    var userJson = HttpContextAccessor.HttpContext?.Session.GetString("user");
+    User? user = null;
+    if (!string.IsNullOrEmpty(userJson))
+    {
+        user = JsonConvert.DeserializeObject<User>(userJson);
+        userName = user?.Name ?? "Guest";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MovieTicketBooking</title>
+    <link rel="stylesheet" type="text/css" href="~/css/bootstrap.min.css" />
+    <link rel="icon" type="image/png" href="~/assets/img/favcion.png" />
+    <link rel="stylesheet" type="text/css" href="~/css/slicknav.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/css/icofont.css" />
+    <link rel="stylesheet" type="text/css" href="~/css/owl.carousel.css">
+    <link rel="stylesheet" type="text/css" href="~/css/magnific-popup.css">
+    <link rel="stylesheet" type="text/css" href="~/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="~/css/responsive.css" />
+</head>
+<body>
+    <div id="preloader"></div>
+    <!-- header section start -->
+    <header class="header">
+        <div class="container">
+            <div class="header-area">
+                <div class="logo">
+                    <a asp-page="/Index"><img src="~/assets/img/logo.png" alt="logo" /></a>
+                </div>
+                <div class="header-right">
+                    <form asp-page="/Movies/Search" method="get">
+                        <div style="margin: 10px">
+                            Movies
+                        </div>
+                        <input type="text" name="keyword" />
+                        <button type="submit"><i class="icofont icofont-search"></i></button>
+                    </form>
+                    <ul>
+                        <li><a asp-page="/Profile/Edit">Welcome @userName!</a></li>
+                        @if (userName.Equals("Guest"))
+                        {
+                            <li><a asp-page="/Auth/Login">Log in</a></li>
+                        }
+                        else
+                        {
+                            <li><a asp-page="/Auth/Login" asp-page-handler="Logout">Log out</a></li>
+                        }
+                    </ul>
+                </div>
+                <div class="menu-area">
+                    <div class="responsive-menu"></div>
+                    <div class="mainmenu">
+                        <ul id="primary-menu">
+                            @if (user != null && user.Role == 3)
+                            {
+                                <li><a asp-page="/Admin/Dashboard">Admin Dashboard</a></li>
+                            }
+                            @if (user != null && user.Role == 2)
+                            {
+                                <li><a asp-page="/Staff/StaffMain">Staff Page</a></li>
+                            }
+                            <li><a asp-page="/Index">Home</a></li>
+                            <li><a asp-page="/Movies/Index">Movies</a></li>
+                            @if (user != null)
+                            {
+                                <li><a asp-page="/Booking/Index">Booking History</a></li>
+                                <li><a class="theme-btn" href="#"><i class="icofont icofont-ticket"></i> Tickets</a></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    @if (user != null)
+    {
+        <div class="buy-ticket">
+            <div class="container">
+                <div class="buy-ticket-area">
+                    <a href="#"><i class="icofont icofont-close"></i></a>
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="buy-ticket-box">
+                                <h4>Buy Tickets</h4>
+                                <h5>Seat</h5>
+                                <h6>Screen</h6>
+                                <div class="ticket-box-table">
+                                    <table class="ticket-table-seat"></table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 offset-lg-1">
+                            <div class="buy-ticket-box mtr-30">
+                                <h4>Your Information</h4>
+                                <ul>
+                                    <li>
+                                        <p>Date</p>
+                                        <input type="date" id="movieDate" name="movieDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                                    </li>
+                                    <li>
+                                        <p>Movie</p>
+                                        <select name="movieOptions" id="movieOptions" required>
+                                            @await Component.InvokeAsync("MovieOptions")
+                                        </select>
+                                    </li>
+                                    <li>
+                                        <p>Slot</p>
+                                        <select name="slots" required>
+                                        </select>
+                                    </li>
+                                    <li>
+                                        <p>Seats</p>
+                                        <span id="seats"></span>
+                                    </li>
+                                    <li>
+                                        <p>Price</p>
+                                        <span id="price"></span>
+                                    </li>
+                                    <li>
+                                        <form id="bookingForm" method="post" asp-page="/Booking/Create">
+                                            <input type="hidden" name="Date" id="formMovieDate" />
+                                            <input type="hidden" name="MovieId" id="formMovieId" />
+                                            <input type="hidden" name="ShowtimeId" id="formShowtimeId" />
+                                            <input type="hidden" name="Seats" id="formSeats" />
+                                            <input type="hidden" name="Price" id="formPrice" />
+                                            <a href="#" class="theme-btn" onclick="submitBookingForm(); return false;">Book</a>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @RenderBody()
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-sm-6">
+                    <div class="widget">
+                        <img src="~/assets/img/logo.png" alt="about" />
+                        <p>7th Harley Place, London W1G 8LZ United Kingdom</p>
+                        <h6><span>Call us: </span>(+880) 111 222 3456</h6>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="widget">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="#">Terms of Use</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Security</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="widget">
+                        <h4>Account</h4>
+                        <ul>
+                            <li><a href="#">My Account</a></li>
+                            <li><a href="#">Watchlist</a></li>
+                            <li><a href="#">Collections</a></li>
+                            <li><a href="#">User Guide</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <div class="widget">
+                        <h4>Newsletter</h4>
+                        <p>Subscribe to our newsletter system now to get latest news from us.</p>
+                        <form action="#">
+                            <input type="text" placeholder="Enter your email.." />
+                            <button>SUBSCRIBE NOW</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <hr />
+        </div>
+        <div class="copyright">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 text-center text-lg-left">
+                        <div class="copyright-content">
+                            <p><a target="_blank" href="https://www.templateshub.net">Templates Hub</a></p>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 text-center text-lg-right">
+                        <div class="copyright-content">
+                            <a href="#" class="scrollToTop">
+                                Back to top<i class="icofont icofont-arrow-up"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/js/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js"></script>
+    <script src="~/js/owl.carousel.min.js"></script>
+    <script src="~/js/jquery.magnific-popup.min.js"></script>
+    <script src="~/js/jquery.slicknav.min.js"></script>
+    <script src="~/js/isotope.pkgd.min.js"></script>
+    <script src="~/js/main.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

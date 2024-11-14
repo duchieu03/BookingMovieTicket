@@ -1,0 +1,7 @@
+﻿@model IEnumerable<MovieTicketBooking.Models.Movie>
+
+<option value="">Select a movie</option>
+@foreach (var movie in Model)
+{
+    <option value="@movie.MovieId">@movie.Title</option>
+}

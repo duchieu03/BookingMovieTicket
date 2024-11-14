@@ -1,0 +1,50 @@
+﻿@page
+@using MovieTicketBooking.Common
+@model MovieTicketBooking.Pages.Movies.SearchModel
+@{
+    ViewData["Title"] = "Movies";
+}
+
+<!-- breadcrumb area start -->
+<section class="breadcrumb-area">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb-area-content">
+                    <h1>Search Result</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</section><!-- breadcrumb area end -->
+<!-- portfolio section start -->
+<section class="portfolio-area pt-60 mb-3">
+    <div class="container">
+        <div class="row flexbox-center">
+            <div class="col-lg-6 text-center text-lg-left">
+                <div class="section-title">
+                    <h1><i class="icofont icofont-search"></i>@(Model.resultCount == 0 ? "No" : Model.resultCount) result(s) found</h1>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row portfolio-item">
+            @foreach (var movie in Model.Movies)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="single-portfolio">
+                        <div class="single-portfolio-img">
+                            <a asp-page="/Movies/Detail" asp-route-movieId="@movie.MovieId"><img src="~/assets/img/movies/@movie.ImgUrl" alt="portfolio" /></a>
+                        </div>
+                        <div class="portfolio-content">
+                            <a asp-page="/Movies/Detail" asp-route-movieId="@movie.MovieId"><h2>@movie.Title</h2></a>
+                            <div class="review">
+                                <h5>@(movie.Status == (int)MovieStatus.ComingSoon ? "Coming Soon" : $"{movie.Duration / 60}h{movie.Duration % 60}m")</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section><!-- portfolio section end -->

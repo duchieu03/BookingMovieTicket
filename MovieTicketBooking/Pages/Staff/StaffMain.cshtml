@@ -1,0 +1,625 @@
+﻿@page
+@model MovieTicketBooking.Pages.Staff.StaffMainModel
+@using System.Text.Json;
+@using Models
+@using System.Text.Encodings.Web
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+    var movies = ViewData["movies"] as List<Movie>;
+    var errors = ViewData["Errors"] as List<string>;
+    var userName = ViewData["user"].ToString();
+    var deleteSS = ViewData["delete_success"];
+    var editSS = ViewData["edit_success"];
+    var createSS = ViewData["create_success"];
+    var genres = ViewData["genres"] as List<Genre>; ;
+}
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/png" href="~/assetsStaff/images/icon/favicon.ico">
+    <link rel="stylesheet" href="~/assetsStaff/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/assetsStaff/css/font-awesome.min.css">
+    <link rel="stylesheet" href="~/assetsStaff/css/themify-icons.css">
+    <link rel="stylesheet" href="~/assetsStaff/css/metisMenu.css">
+    <link rel="stylesheet" href="~/assetsStaff/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="~/assetsStaff/css/slicknav.min.css">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="~/assetsStaff/css/typography.css">
+    <link rel="stylesheet" href="~/assetsStaff/css/default-css.css">
+    <link rel="stylesheet" href="~/assetsStaff/css/styles.css">
+    <link rel="stylesheet" href="~/assetsStaff/css/responsive.css">
+    <script src="~/assetsStaff/js/vendor/modernizr-2.8.3.min.js"></script>
+</head>
+
+<body>
+    <div id="preloader">
+        <div class="loader"></div>
+    </div>
+    <!-- preloader area end -->
+    <!-- page container area start -->
+    <div class="page-container">
+        <!-- sidebar menu area start -->
+        <div class="sidebar-menu">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <a asp-page="/Index"><img src="/assets/img/logo.png" alt="logo"></a>
+                </div>
+            </div>
+            <div class="main-menu">
+                <div class="menu-inner">
+                    <nav>
+                        <ul class="metismenu" id="menu">                           
+                            <li class="active">
+                                <a href="javascript:void(0)" aria-expanded="true">
+                                    <i class="fa fa-table"></i>
+                                    <span>Management</span>
+                                </a>
+                                <ul class="collapse">
+                                    <li class="active"><a asp-page="/Staff/StaffMain">Movie list</a></li>
+                                    <li><a asp-page="/Staff/Showtimes">Showtimes</a></li>
+                                    <li><a href="datatable.html">datatable</a></li>
+                                </ul>
+                            </li>                                                      
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <!-- main content area start -->
+        <div class="main-content">
+            <!-- header area start -->         
+            <!-- header area end -->
+            <!-- page title area start -->
+            <div class="page-title-area">
+                <div class="row align-items-center">
+                    <div class="col-sm-6">
+                        <div class="breadcrumbs-area clearfix">
+                            <div class="nav-btn pull-left" style="margin-top: 2px; margin-right: 10px;">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <h4 class="page-title pull-left">Movie management</h4>
+                            <ul class="breadcrumbs pull-left">
+                                <li><a asp-page="/Index">Home</a></li>
+                                <li><span>Movie</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 clearfix">
+                        <div class="user-profile pull-right">
+                            <img class="avatar user-thumb" src="~/assetsStaff/images/author/avatar.png" alt="avatar">
+                            <h4 class="user-name dropdown-toggle" data-toggle="dropdown">@userName <i class="fa fa-angle-down"></i></h4>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" asp-page="/Profile/Edit">Profile</a>
+                                <a class="dropdown-item" asp-page="/Auth/Login" asp-page-handler="Logout">Log Out</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- page title area end -->
+            <div class="main-content-inner">
+                <div class="col-lg-12 mt-5">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <h4 class="header-title">Movie list</h4>
+                                </div>
+                                <div class="col-md-3 text-right">
+                                    <form method="post" asp-page-handler="SearchMovies">
+                                        <input style="height: 30px" type="text" name="search" class="form-control" placeholder="Search movies by name..." />
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="single-table">
+                                <div class="table-responsive">
+                                    <table class="table text-center" id="movieTable">
+                                        <thead class="text-uppercase bg-primary">
+                                            <tr class="text-white">
+                                                <th scope="col">ID</th>
+                                                <th scope="col">Title</th>
+                                                <th scope="col">Duration</th>
+                                                <th scope="col">Release date</th>                       
+                                                <th scope="col">Status</th>
+                                                <th scope="col">Detail</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var m in movies)
+                                    {
+                                                <tr>
+                                                    <td>@m.MovieId</td>
+                                                    <td>@m.Title</td>
+                                                    <td>@m.Duration mins</td>
+                                                    <td>@String.Format("{0:dd/MM/yyyy}", m.ReleaseDate)</td>
+                                                                         
+                                                    @if (m.Status == 1)
+                                                    {
+                                                        <td style="color: green">Active</td>
+                                                    }
+                                                    else if (m.Status == 0)
+                                                    {
+                                                        <td style="color: red">Disabled</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td></td>
+                                                    }
+                                                    <td><a class="m-btn edit-btn" href="javascript:void(0)" onclick="openForm('@m.MovieId', '@m.Title', '@m.Description', '@m.Duration', '@m.ReleaseDate?.ToString("yyyy-MM-dd")', '@m.Director', '@m.Language', '@m.Status', '@String.Join(",", m.Genres.Select(g => g.Name).ToList())', '@String.Join(",", m.Actors.Select(g => g.Name).ToList())')">Edit</a></td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                    <div class="pagination">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    @if (Model.CurrentPage > 1)
+
+
+
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Staff/StaffMain?page=@(Model.CurrentPage - 1)">Previous</a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+
+
+
+                    {
+                        <li class="page-item @(Model.CurrentPage == i ? "active" : "")" aria-current="page">
+                            <a class="page-link" href="/Staff/StaffMain?page=@i">@i</a>
+                        </li>
+                    }
+                    @if (Model.CurrentPage < Model.TotalPages)
+
+
+
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Staff/StaffMain?page=@(Model.CurrentPage + 1)">Next</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+                                </div>
+                                
+                            </div>
+                            <!-- Popup form -->
+                            <div id="editMovieDialog" class="popup-form" style="display: none;">
+                                <div class="popup-container">
+                                    <div class="popup-header">
+                                        <div class="header-title">Edit Movie</div>
+                                        <div class="header-close">
+                                            <a href="javascript:void(0)" onclick="closeForm()" style="color: red; font-weight: bold;">X</a>
+                                        </div>
+                                    </div>
+                                    <div class="popup-body">
+                                        <form method="post" asp-page-handler="EditMovie" enctype="multipart/form-data">
+                                            <div class="form-row">
+                                                <div class="form-grid" style="grid-template-columns: 20% 80%;">
+                                                    <div class="input-group">
+                                                        <label class="form-label">Movie Id</label>
+                                                        <input type="text" class="form-input" name="MovieId" id="MovieId" readonly>
+                                                    </div>
+                                                    <div class="input-group">
+                                                        <label class="form-label">Title</label>
+                                                        <input type="text" class="form-input" name="Title" id="Title" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="input-group">
+                                                    <label class="form-label">Description</label>
+                                                    <input type="text" class="form-input" name="Description" id="Description" required>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-grid" style="grid-template-columns: 110% 110%;">
+                                                    <div class="input-group">
+                                                        <label class="form-label">Duration</label>
+                                                        <input type="number" class="form-input" name="Duration" id="Duration" required>
+                                                    </div>
+                                                    <div class="input-group">
+                                                        <label class="form-label">Release Date</label>
+                                                        <input type="date" class="form-input" name="ReleaseDate" id="ReleaseDate" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-grid" style="grid-template-columns: 75% 75%;">
+                                                    <div class="input-group">
+                                                        <label class="form-label">Director</label>
+                                                        <input type="text" class="form-input" name="Director" id="Director" required>
+                                                    </div>
+                                                    <div class="input-group">
+                                                        <label class="form-label">Picture</label>
+                                                        <input type="file" class="form-input" name="Picture" id="Picture" accept="image/*">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="input-group">
+                                                    <label class="form-label">Language</label>
+                                                    <input type="text" class="form-input" name="Language" id="Language" required>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-grid" style="grid-template-columns: 100% 100%;">
+                                                    <div class="input-group">
+                                                        <label class="form-label">Genre</label>
+                                                        <input type="text" class="form-input" name="genreName" id="Genres" required>
+                                                    </div>
+                                                    <div class="input-group">
+                                                        <label class="form-label">Actor</label>
+                                                        <input type="text" class="form-input" name="actorName" id="Actors" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="input-group">
+                                                    <label class="form-label">Status</label>
+                                                    <select class="form-input" name="Status" id="Status">
+                                                        <option value="1">Active</option>
+                                                        <option value="0">Disabled</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <button type="submit" class="btn btn-success mb-3">Save</button>
+                                                <button type="button" class="btn btn-danger mb-3" onclick="deleteMovie()" style="margin-left: 20px">Delete</button>
+                                            </div>
+                                        </form>
+                                        <form method="post" asp-page-handler="DeleteMovie" id="deleteForm">
+                                            <input type="hidden" class="form-input" name="MovieId" id="DeleteMovieId">
+                                        </form>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Popup form end -->
+                            <!-- Create Movie Popup Form -->
+                            <div id="createMovieDialog" class="popup-form" style="display: none;">
+                                <div class="popup-container">
+                                    <div class="popup-header">
+                                        <div class="header-title">Create Movie</div>
+                                        <div class="header-close">
+                                            <a href="javascript:void(0)" onclick="closeCreateForm()" style="color: black; font-weight: bold;">X</a>
+                                        </div>
+                                    </div>
+                                    <div class="popup-body">
+                                        <form method="post" asp-page-handler="CreateMovie" enctype="multipart/form-data">
+                                            <div class="form-row">
+                                                <div class="form-grid" style="grid-template-columns: 75% 75%;">
+                                                    <div class="input-group">
+                                                        <label class="form-label">Title</label>
+                                                        <input type="text" class="form-input" name="Title" id="CreateTitle" required>
+                                                    </div>
+                                                    <div class="input-group">
+                                                        <label class="form-label">Picture</label>
+                                                        <input type="file" class="form-input" name="Picture" id="Picture" accept="image/*" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="input-group">
+                                                    <label class="form-label">Description</label>
+                                                    <input type="text" class="form-input" name="Description" id="CreateDescription" required>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-grid" style="grid-template-columns: 110% 110%;">
+                                                    <div class="input-group">
+                                                        <label class="form-label">Duration</label>
+                                                        <input type="number" class="form-input" name="Duration" id="CreateDuration" required>
+                                                    </div>
+                                                    <div class="input-group">
+                                                        <label class="form-label">Release Date</label>
+                                                        <input type="date" class="form-input" name="ReleaseDate" id="CreateReleaseDate" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-grid" style="grid-template-columns: 100% 100%;">
+                                                    <div class="input-group">
+                                                        <label class="form-label">Director</label>
+                                                        <input type="text" class="form-input" name="Director" id="CreateDirector" required>
+                                                    </div>
+                                                    <div class="input-group">
+                                                        <label class="form-label">Actor</label>
+                                                        <input type="text" class="form-input" name="actorName" id="CreateActor" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-grid" style="grid-template-columns: 125% 125%;">
+                                                    <div class="input-group">
+                                                        <label class="form-label">Language</label>
+                                                        <input type="text" class="form-input" name="Language" id="CreateLanguage" required>
+                                                    </div>
+                                                    <div class="input-group">
+                                                        <label class="form-label">Genre</label>
+                                                        <select class="form-input" name="genreId" id="Genre">
+                                                            @foreach(var g in genres)
+                                                            {
+                                                                <option value="@g.GenreId">@g.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>                                          
+                                            <div class="form-row">
+                                                <button type="submit" class="btn btn-primary mb-3" style="margin-right: 15px">Create</button>
+                                                <button type="button" class="btn btn-secondary mb-3" onclick="closeCreateForm()">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Create Movie Popup Form end -->
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.6rem;">
+                            <button type="button" href="javascript:void(0)" onclick="openCreateForm()" class="btn btn-primary" style="width: 150px;">Create a new movie</button>
+                            <form method="post" asp-page-handler="ExportToExcel" style="margin: 0;">
+                                <button type="submit" class="btn btn-primary">Export to Excel</button>
+                            </form>
+                        </div>
+
+                        <div>
+                            @if (errors != null)
+                            {
+                                <a style="color: red; margin-left: 1.6rem;">Cannot create movie: </a>
+                                for (int i = 0; i < errors.Count; i++)
+                                {
+                                    <a style="color: red">@errors[i]@(i < errors.Count - 1 ? "; " : ".") </a>
+                                }
+                            }
+                        </div>
+                     </div>
+                    
+                    @if (deleteSS != null)
+                    {
+                        <script>
+                            var deleteSS = '@deleteSS';
+                            localStorage.setItem('deleteSS', deleteSS);
+                        </script>
+                    }
+                    @if (createSS != null)
+                    {
+                        <script>
+                            var createSS = '@createSS';
+                            localStorage.setItem('createSS', createSS);
+                        </script>
+                    }
+                    @if (editSS != null)
+                    {
+                        <script>
+                            var editSS = '@editSS';
+                            localStorage.setItem('editSS', editSS);
+                        </script>
+                    }
+                </div>
+                <!-- MAIN CONTENT GOES HERE -->
+            </div>
+        </div>
+        <!-- main content area end -->
+        <!-- footer area start-->
+        <footer>
+            <div class="footer-area">
+                <p>© Copyright 2018. All right reserved. Template by <a href="">Group 3</a>.</p>
+            </div>
+        </footer>
+        <!-- footer area end-->
+    </div>
+    <!-- page container area end -->
+    
+    <script src="~/assetsStaff/js/vendor/jquery-2.2.4.min.js"></script>
+    <script src="~/assetsStaff/js/popper.min.js"></script>
+    <script src="~/assetsStaff/js/bootstrap.min.js"></script>
+    <script src="~/assetsStaff/js/owl.carousel.min.js"></script>
+    <script src="~/assetsStaff/js/metisMenu.min.js"></script>
+    <script src="~/assetsStaff/js/jquery.slimscroll.min.js"></script>
+    <script src="~/assetsStaff/js/jquery.slicknav.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+    <script>
+        zingchart.MODULESDIR = "https://cdn.zingchart.com/modules/";
+        ZC.LICENSE = ["569d52cefae586f634c54f86dc99e6a9", "ee6b7db5b51705a13dc2339db3edaf6d"];
+    </script>
+    <script src="~/assetsStaff/js/line-chart.js"></script>
+    <script src="~/assetsStaff/js/pie-chart.js"></script>
+    <script src="~/assetsStaff/js/plugins.js"></script>
+    <script src="~/assetsStaff/js/scripts.js"></script>
+
+    <script>     
+        document.addEventListener("DOMContentLoaded", function () {
+            var deleteSS = '@deleteSS';
+            var createSS = '@createSS';
+            var editSS = '@editSS';
+
+            if (deleteSS) {
+                alert("Delete successfully!");
+            }
+
+            if (createSS) {
+                alert("Create successfully!");
+            }
+
+            if (editSS) {
+                alert("Edit successfully!");
+            }
+        });
+
+        const message = "@ViewData["Message"]";
+
+        // If there's a message, show a popup
+        if (message) {
+            alert(message);  // Simple alert
+        }
+
+        function openForm(movieId, title, description, duration, releaseDate, director, language, status, genreNames, actorNames) {
+            document.getElementById("editMovieDialog").style.display = "block";
+            document.getElementById("MovieId").value = movieId;
+            document.getElementById("Title").value = title;
+            document.getElementById("Description").value = description;
+            document.getElementById("Duration").value = duration;
+            document.getElementById("ReleaseDate").value = releaseDate;
+            document.getElementById("Director").value = director;
+            document.getElementById("Language").value = language;
+            document.getElementById("Status").value = status;
+            document.getElementById("DeleteMovieId").value = movieId;
+            document.getElementById("Genres").value = genreNames;
+            document.getElementById("Actors").value = actorNames;
+        }       
+
+        function openCreateForm() {
+            document.getElementById('createMovieDialog').style.display = 'block';
+        }
+        function deleteMovie() {
+            if (confirm("Are you sure you want to delete this movie?")) {
+                document.getElementById("deleteForm").submit();
+            }
+        }
+        function closeForm() {
+            document.getElementById("editMovieDialog").style.display = "none";
+        }
+        function closeCreateForm() {
+            document.getElementById('createMovieDialog').style.display = 'none';
+        }
+  
+
+   
+    </script>
+    <style>
+        .popup-form {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50%;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        .popup-container {
+            padding: 20px;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .popup-body {
+            margin-top: 20px;
+        }
+
+        .form-row {
+            margin-bottom: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .form-footer {
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .form-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+
+            .form-btn.save-btn {
+                background-color: #28a745;
+            }
+
+            .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+        .pagination .page-item {
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+            .pagination .page-item .page-link {
+                color: #007bff;
+                border: 1px solid #dee2e6;
+                border-radius: 5px;
+                padding: 8px 12px;
+                text-decoration: none;
+                transition: background-color 0.3s, color 0.3s;
+            }
+
+            .pagination .page-item.active .page-link {
+                background-color: #007bff;
+                color: #fff;
+                border-color: #007bff;
+            }
+
+            .pagination .page-item .page-link:hover {
+                background-color: #0056b3;
+                color: #fff;
+                border-color: #0056b3;
+            }
+
+            .pagination .page-item.disabled .page-link {
+                color: #6c757d;
+                pointer-events: none;
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+            }
+    </style>
+</body>
+
+</html>
